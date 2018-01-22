@@ -1,0 +1,7 @@
+/.idea/
+/target/
+/cds-jsonview-starter.iml
+*.xml.versionsBackup
+/cds-jsonview-starter.ipr
+/cds-jsonview-starter.iws
+/cds-starter-jsonview.iml
