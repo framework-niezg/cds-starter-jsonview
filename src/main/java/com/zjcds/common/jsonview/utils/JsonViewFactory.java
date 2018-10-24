@@ -1,5 +1,6 @@
 package com.zjcds.common.jsonview.utils;
 
+import com.zjcds.common.jsonview.exception.JsonViewException;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -97,6 +98,18 @@ public class JsonViewFactory {
 		modelAndView.setViewName(VIEW_NAME);
     	modelAndView.addObject(MODEL_KEY, responseResult);
     	return modelAndView;
+	}
+
+	public static ModelAndView buildJsonViewException(Exception e) {
+		String msg = e.getMessage();
+		if(msg == null) {
+			msg = "请求出错！";
+		}
+		ModelAndView modelAndView = buildJsonView(new ResponseResult<Object>(false,msg));
+		if(e instanceof JsonViewException) {
+			modelAndView.setStatus(((JsonViewException) e).getHttpStatus());
+		}
+		return modelAndView;
 	}
 
 }

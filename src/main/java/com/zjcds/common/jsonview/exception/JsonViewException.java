@@ -1,11 +1,20 @@
 package com.zjcds.common.jsonview.exception;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.http.HttpStatus;
+
 /**
  * created date：2016-11-29
  *
  * @author niezhegang
  */
+@Getter
+@Setter
 public class JsonViewException extends RuntimeException {
+
+    private HttpStatus httpStatus = HttpStatus.OK;
+
     public JsonViewException() {
         super();
     }

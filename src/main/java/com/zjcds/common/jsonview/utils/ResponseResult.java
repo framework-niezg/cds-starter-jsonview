@@ -14,7 +14,7 @@ public class ResponseResult<T> extends BaseBean {
 	/** 请求是否成功，成功为true，否则为true */
 	private boolean success = true;
 	/** 响应消息，请求失败必须设置响应消息 */
-	private String msg = "请求成功。";
+	private String msg = "请求成功";
 	/** 响应数据 */
 	private T data;
 

@@ -29,6 +29,7 @@ import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * json视图自动配置
@@ -84,26 +85,15 @@ public class JsonViewAutoConfiguration {
 
         @ExceptionHandler(JsonViewException.class)
         public ModelAndView resolveJsonViewException(HttpServletRequest req, JsonViewException exception) {
-            //首先记录错误日志
-            String msg = exception.getMessage();
-            if(msg == null) {
-                msg = "请求出错！";
-            }
-            logger.error(msg, exception);
-            return JsonViewFactory.buildJsonView(new ResponseResult<Object>(false,msg));
+            logger.error(exception.getMessage(), exception);
+            return JsonViewFactory.buildJsonViewException(exception);
         }
 
         @ExceptionHandler({BindException.class, TypeMismatchException.class, MethodArgumentNotValidException.class, ServletRequestBindingException.class})
         public ModelAndView resolveBindException(HttpServletRequest req, Exception exception) {
-            //首先记录错误日志
-            String msg = exception.getMessage();
-            if(msg == null) {
-                msg = "参数绑定出错！";
-            }
-            logger.error(msg, exception);
-            return JsonViewFactory.buildJsonView(new ResponseResult<Object>(false,msg));
+            logger.error(exception.getMessage(), exception);
+            return JsonViewFactory.buildJsonViewException(exception);
         }
-
     }
 
     /**
@@ -137,8 +127,8 @@ public class JsonViewAutoConfiguration {
         public static class JsonViewExceptionAspect {
 
             @Pointcut("execution(* com.zjcds..*(..)) "+
-                    "(@target(org.springframework.stereotype.Controller) || @target(org.springframework.web.bind.annotation.RestController))" +
-                    "&& (@annotation(com.zjcds.common.jsonview.annotations.JsonViewException) || @target(com.zjcds.common.jsonview.annotations.JsonViewException))")
+                    "&& (@target(org.springframework.stereotype.Controller) || @target(org.springframework.web.bind.annotation.RestController))" )
+                    //+ "&& (@annotation(com.zjcds.common.jsonview.annotations.JsonViewException) || @target(com.zjcds.common.jsonview.annotations.JsonViewException))")
             public void jsonViewException() {}
 
             @AfterThrowing(pointcut = "jsonViewException()",throwing = "ex")
