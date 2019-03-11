@@ -1,9 +1,9 @@
 package com.zjcds.common.jsonview;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zjcds.common.jsonview.exception.HttpStatusException;
 import com.zjcds.common.jsonview.exception.JsonViewException;
 import com.zjcds.common.jsonview.utils.JsonViewFactory;
-import com.zjcds.common.jsonview.utils.ResponseResult;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
@@ -29,7 +29,6 @@ import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * json视图自动配置
@@ -47,19 +46,17 @@ public class JsonViewAutoConfiguration {
 
     @Configuration
     @ConditionalOnClass({ObjectMapper.class,MappingJackson2JsonView.class,BeanNameViewResolver.class})
-    @ConditionalOnMissingBean(MappingJackson2JsonView.class)
+//    @ConditionalOnMissingBean(MappingJackson2JsonView.class)
     public static class JsonViewCreater{
         @Autowired
         private ObjectMapper objectMapper;
 
-        final static private String modelKey = "responseResult";
-
-        @Bean(name="jsonView")
+        @Bean(name= JsonViewFactory.VIEW_NAME)
         public MappingJackson2JsonView jsonView(){
             MappingJackson2JsonView jsonView = new MappingJackson2JsonView();
             jsonView.setExtractValueFromSingleKeyModel(true);
             jsonView.setObjectMapper(this.objectMapper);
-            jsonView.setModelKey(modelKey);
+            jsonView.setModelKey(JsonViewFactory.MODEL_KEY);
             return jsonView;
         }
         /**
@@ -133,7 +130,10 @@ public class JsonViewAutoConfiguration {
 
             @AfterThrowing(pointcut = "jsonViewException()",throwing = "ex")
             public void doJsonViewExceptionProcess(Exception ex) {
-                if( !(ex instanceof JsonViewException)){
+                if(ex instanceof HttpStatusException || ex instanceof JsonViewException) {
+                    return;
+                }
+                else {
                     throw new JsonViewException(ex);
                 }
             }

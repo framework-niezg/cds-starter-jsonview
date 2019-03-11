@@ -1,6 +1,8 @@
 package com.zjcds.common.jsonview.utils;
 
+import com.zjcds.common.jsonview.exception.HttpStatusException;
 import com.zjcds.common.jsonview.exception.JsonViewException;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.ModelAndView;
 
 /**
@@ -27,6 +29,17 @@ public class JsonViewFactory {
 		return buildJsonView(new ModelAndView());
 	}
 
+	public static ModelAndView buildJsonView(HttpStatus httpStatus) {
+		return buildJsonView(createModelAndViewWithHttpStatus(httpStatus));
+	}
+
+	private static ModelAndView createModelAndViewWithHttpStatus(HttpStatus httpStatus) {
+		ModelAndView modelAndView = new ModelAndView();
+		if(httpStatus != null)
+			modelAndView.setStatus(httpStatus);
+		return modelAndView;
+	}
+
 	/**
 	 * 构建JSON视图对象，用于请求成功且需要响应数据的情况
 	 *
@@ -41,6 +54,10 @@ public class JsonViewFactory {
     	return buildJsonView(new ModelAndView(), data);
 	}
 
+	public static <T> ModelAndView buildJsonView(HttpStatus httpStatus,T data) {
+		return buildJsonView(createModelAndViewWithHttpStatus(httpStatus), data);
+	}
+
 	/**
 	 * 构建JSON视图对象，需要指定完整的响应结果对象
 	 *
@@ -53,6 +70,10 @@ public class JsonViewFactory {
 	 */
 	public static <T> ModelAndView buildJsonView(ResponseResult<T> responseResult) {
 		return buildJsonView(new ModelAndView(), responseResult);
+	}
+
+	public static <T> ModelAndView buildJsonView(HttpStatus httpStatus,ResponseResult<T> responseResult) {
+		return buildJsonView(createModelAndViewWithHttpStatus(httpStatus), responseResult);
 	}
 
 	/**
@@ -105,10 +126,17 @@ public class JsonViewFactory {
 		if(msg == null) {
 			msg = "请求出错！";
 		}
-		ModelAndView modelAndView = buildJsonView(new ResponseResult<Object>(false,msg));
-		if(e instanceof JsonViewException) {
-			modelAndView.setStatus(((JsonViewException) e).getHttpStatus());
-		}
+        ModelAndView modelAndView;
+		if(e instanceof HttpStatusException) {
+            HttpStatusException httpStatusException = (HttpStatusException) e;
+            modelAndView = buildJsonView(httpStatusException.getHttpStatusCode(),new ResponseResult<Object>(false,msg));
+        }
+        else {
+            modelAndView = buildJsonView(new ResponseResult<Object>(false,msg));
+            if(e instanceof JsonViewException) {
+                modelAndView.setStatus(((JsonViewException) e).getHttpStatus());
+            }
+        }
 		return modelAndView;
 	}
 
