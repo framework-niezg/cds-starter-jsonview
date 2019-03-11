@@ -80,8 +80,8 @@ public class JsonViewAutoConfiguration {
         /**日志记录器*/
         Logger logger = LoggerFactory.getLogger(this.getClass());
 
-        @ExceptionHandler(JsonViewException.class)
-        public ModelAndView resolveJsonViewException(HttpServletRequest req, JsonViewException exception) {
+        @ExceptionHandler({JsonViewException.class,HttpStatusException.class})
+        public ModelAndView resolveJsonViewException(HttpServletRequest req, Exception exception) {
             logger.error(exception.getMessage(), exception);
             return JsonViewFactory.buildJsonViewException(exception);
         }
